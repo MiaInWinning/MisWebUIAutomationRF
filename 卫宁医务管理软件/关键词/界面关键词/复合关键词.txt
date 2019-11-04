@@ -6,9 +6,9 @@ Resource          ../环境配置.txt
 进入模块
     [Arguments]    ${onemodule}    ${twomodule}    ${threemodule}=none
     [Documentation]    参数传入说明
-    ...    1、${onemodule} : 第一级菜单
-    ...    2、${twomodule} : 第二级菜单
-    ...    3、${threemodule}:第三级菜单
+    ...    1、${onemodule} : 第一级菜单1
+    ...    2、${twomodule} : 第二级菜单2
+    ...    3、${threemodule}:第三级菜单3
     ...    关键词说明：移动鼠标的方式，当第三级菜单等于none(不存在)时，将点击第二级菜单；当第三级菜单存在时，将滑动鼠标到第二级菜单，点击第三级菜单
     ...
     日志    正在执行【进入模块】
