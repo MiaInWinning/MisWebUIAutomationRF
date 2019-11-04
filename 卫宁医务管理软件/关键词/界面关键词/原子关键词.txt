@@ -1,0 +1,51 @@
+*** Settings ***
+Library           Selenium2Library
+
+*** Keywords ***
+打开浏览器
+    [Arguments]    ${ip}    ${browser}
+    open browser    ${ip}    ${browser}
+
+关闭浏览器
+    Close Browser
+
+浏览器最大化
+    Maximize Browser Window
+
+等待
+    [Arguments]    ${second}
+    sleep    ${second}    #秒数
+
+等待元素出现
+    [Arguments]    ${wupce}    ${s}
+    Wait Until Page Contains Element    ${wupce}    ${s}
+
+输入文本
+    [Arguments]    ${InputText}    ${text}
+    InputText    ${InputText}    ${text}
+
+点击元素
+    [Arguments]    ${ClickElement}
+    Click Element    ${ClickElement }
+
+点击按钮
+    [Arguments]    ${ClickButton}
+    Click Button    ${ClickButton}
+
+注释
+    Comment
+
+获取浏览器cookie
+    get cookies
+
+鼠标移动
+    [Arguments]    ${mouseover}
+    mouse over    ${mouseover}
+
+页面包含文字
+    [Arguments]    ${locator}
+    Page should contain    ${locator}
+
+日志
+    [Arguments]    ${log}
+    log    ${log}
