@@ -1,0 +1,2 @@
+*** Variables ***
+${web_ip}         http://172.17.0.128:9529/#/login
