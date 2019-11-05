@@ -6,11 +6,10 @@ Resource          ../环境配置.txt
 进入模块
     [Arguments]    ${onemodule}    ${twomodule}    ${threemodule}=none
     [Documentation]    参数传入说明
-    ...    1、${onemodule} : 第一级菜单1
-    ...    2、${twomodule} : 第二级菜单2
-    ...    3、${threemodule}:第三级菜单3
+    ...    1、${onemodule} : 第一级菜单
+    ...    2、${twomodule} : 第二级菜单
+    ...    3、${threemodule}:第三级菜单
     ...    关键词说明：移动鼠标的方式，当第三级菜单等于none(不存在)时，将点击第二级菜单；当第三级菜单存在时，将滑动鼠标到第二级菜单，点击第三级菜单
-    ...
     日志    正在执行【进入模块】
     等待元素出现    xpath=//div[contains(text(),"${onemodule}")]    30
     鼠标移动    xpath=//div[contains(text(),"${onemodule}")]    #一级模块
@@ -36,7 +35,7 @@ Resource          ../环境配置.txt
     等待元素出现    name=username    20
     输入文本    name=username    ${user}
     输入文本    name=password    ${pwd}
-    点击按钮    xpath=//button[@type="button"]
+    点击按钮    登 录    #    xpath=//button[@type="button"]
     [Teardown]    log    已经执行完成【登陆】
 
 页面检查
@@ -120,3 +119,42 @@ Resource          ../环境配置.txt
     Run_keyword_if    '${RunResult}'=='False'    Run Keywords    log    在【${locator}】输入${TextSTR}失败
     ...    AND    Should Match Regexp    1    2    在【${locator}】输入${TextSTR}失败
     [Teardown]    log    已经执行完成【输入文本框】
+
+点击按钮
+    [Arguments]    ${locator}    ${locatorType}=none    ${index}=1
+    log    正在进行【点击操作】
+    ${RunResult}    ${RunResultLog}    Run Keyword And Ignore Error    Current Frame Contains    ${locator}    NONE
+    #进行点击操作
+    Run_keyword_if    '${locatorType}'!='none' and '${locatorType}'!=''    log    进入强关联点击操作1
+    ${RunResult}    Run_keyword_if    '${locatorType}'!='none' and '${locatorType}'!=''    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),'${locatorType}')]/parent::*[1]//*[contains(text(),'${locator}')]
+    Run_keyword_if    '${locatorType}'!='none' and '${locatorType}'!='' and '${RunResult}'=='False'    log    进入强关联点击操作2
+    ${RunResult}    Run_keyword_if    '${locatorType}'!='none' and '${locatorType}'!='' and '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),'${locatorType}')]/parent::*[1]/parent::*[1]//*[contains(text(),'${locator}')]
+    Run_keyword_if    '${locatorType}'!='none' and '${locatorType}'!='' and '${RunResult}'=='False'    log    进入强关联点击操作3-value
+    ${RunResult}    Run_keyword_if    '${locatorType}'!='none' and '${locatorType}'!='' and '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[text()="${locatorType}"]/parent::*/following-sibling::*//*[contains(@value,'${locator}')]
+    #正常点击
+    Run_keyword_if    '${RunResult}'!='True' and '${locatorType}'=='none'    log    进行第一次点击
+    ${RunResult}    Run_keyword_if    '${RunResult}'!='True' and '${locatorType}'=='none'    Run_keyword_and_return_status    click element    xpath=.//*[text()='${locator}'][${index}]
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击1-1
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(@placeholder,"${locator}")]
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击1-2
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),'${locator}')][${index}]
+    #表格-2-td-tr
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击2-1
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//td[.='${locator}'][${index}]
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击2-2
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//tr[${index}]//*[contains(text(),"${locator}")]
+    #value-2
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击3-value
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(@value,'${locator}')]
+    #--#由于if语句不执行也会将变量置空
+    Comment    log    点击结果${RunResultvalue}
+    Comment    ${RunResult}    set variable if    ${RunResultvalue}=='True'    ${RunResult}    ${RunResultvalue}
+    Comment    log    判断结果${RunResult}
+    #--#由于if语句不执行也会将变量置空
+    #radio-1
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击4-radio
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),"${locator}")]//*[contains(@type,"radio")][${index}]
+    #点击失败判断终止
+    Run_keyword_if    '${RunResult}'=='False'    Run Keywords    log    在【${locator}】失败
+    ...    AND    Should Match Regexp    在【${locator}】点击失败1    在【${locator}】点击失败2
+    [Teardown]    log    =======KeyWordExecuteStatus=======已经执行完成【点击按钮】
