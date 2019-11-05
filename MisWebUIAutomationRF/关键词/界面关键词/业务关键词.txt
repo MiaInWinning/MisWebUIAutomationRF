@@ -1,0 +1,9 @@
+*** Settings ***
+Resource          ../环境配置.txt
+Resource          复合关键词.txt
+
+*** Keywords ***
+表格按钮
+    [Arguments]    ${ClickElement}
+    点击元素    //div[2]/table/tbody/tr[1]/td/div/button/*[text()='${ClickElement}']
+    //div/table/tbody/tr[1]/td/*[text()='jack测试试卷']

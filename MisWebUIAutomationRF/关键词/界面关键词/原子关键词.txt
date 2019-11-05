@@ -28,10 +28,6 @@ Library           Selenium2Library
     [Arguments]    ${ClickElement}
     Click Element    ${ClickElement }
 
-点击按钮
-    [Arguments]    ${ClickButton}
-    Click Button    ${ClickButton}
-
 注释
     Comment
 

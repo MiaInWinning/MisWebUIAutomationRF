@@ -123,7 +123,6 @@ Resource          ../环境配置.txt
 点击按钮
     [Arguments]    ${locator}    ${locatorType}=none    ${index}=1
     log    正在进行【点击操作】
-    ${RunResult}    ${RunResultLog}    Run Keyword And Ignore Error    Current Frame Contains    ${locator}    NONE
     #进行点击操作
     Run_keyword_if    '${locatorType}'!='none' and '${locatorType}'!=''    log    进入强关联点击操作1
     ${RunResult}    Run_keyword_if    '${locatorType}'!='none' and '${locatorType}'!=''    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),'${locatorType}')]/parent::*[1]//*[contains(text(),'${locator}')]
