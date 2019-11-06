@@ -39,31 +39,13 @@ Resource          ../环境配置.txt
     [Teardown]    log    已经执行完成【登陆】
 
 页面检查
-    [Arguments]    ${locator}
+    [Arguments]    ${locator}    ${IsContains}=包含
     [Documentation]    参数传入说明
-    ...    传入页面需要检查的文字，临时用。
+    ...    传入页面需要检查的文字
     log    正在进行【页面检查】
     等待    2
     页面包含文字    ${locator}
-    [Teardown]    log    已经执行完成【页面检查】
-
-点击
-    [Arguments]    ${Element}
-    [Documentation]    参数传入说明
-    ...    待续，调试用
-    log    正在进行【输入文本框操作】
-    等待元素出现    xpath=//span[contains(text(),"${Element}")]    10
-    点击元素    xpath=//span[contains(text(),"${Element}")]
-    [Teardown]    log    已经执行完成【输入文本框】
-
-输入
-    [Arguments]    ${name}    ${value}
-    [Documentation]    参数传入说明
-    ...    待续，调试用
-    log    正在进行【输入文本框操作】
-    等待元素出现    xpath=//input[@placeholder="${name}"]    10
-    输入文本    xpath=//input[@placeholder="${name}"]    ${value}
-    [Teardown]    log    已经执行完成【输入文本框】
+    [Teardown]    log    =======KeyWordExecuteStatus=======已经执行完成【页面检查】
 
 下拉选择
     [Arguments]    ${name}    ${value}
@@ -77,6 +59,7 @@ Resource          ../环境配置.txt
     log    正在进行【输入文本框操作】
     等待元素出现    xpath=//input[@placeholder="${name}"]    10
     点击元素    xpath=//input[@placeholder="${name}"]
+    等待    1
     等待元素出现    xpath=//*[contains(text(),"${value}")]    10
     点击元素    xpath=//*[contains(text(),"${value}")]
     [Teardown]    log    已经执行完成【输入文本框】
@@ -93,7 +76,6 @@ Resource          ../环境配置.txt
     ...    例如:页面包含两个姓名input,一个在主页面, 一个在 \ 个人介绍的弹出框中
     ...    需要输入第二个文本框 \ 入参为 \ \ "个人介绍"进行强关联
     log    正在进行【输入文本框操作】
-    ${RunResult}    ${RunResultLog}    Run Keyword And Ignore Error    Current Frame Contains    ${locator}    NONE
     #强关联
     Run_keyword_if    '${indextype}'!='none' and '${indextype}'!=''    log    进行强关联输入文本
     ${RunResult}    Run_keyword_if    '${indextype}'!='none' and '${indextype}'!=''    Run_keyword_and_return_status    Input Text    xpath=.//*[contains(text(),"${indextype}")]/parent::*/following-sibling::*//*[contains(@placeholder,"${locator}")]    ${TextSTR}
@@ -157,3 +139,39 @@ Resource          ../环境配置.txt
     Run_keyword_if    '${RunResult}'=='False'    Run Keywords    log    在【${locator}】失败
     ...    AND    Should Match Regexp    在【${locator}】点击失败1    在【${locator}】点击失败2
     [Teardown]    log    =======KeyWordExecuteStatus=======已经执行完成【点击按钮】
+
+点击弹出框
+    [Arguments]    ${locator}    ${WindowsRemark}=none    ${index}=*
+    log    =======KeyWordExecuteStatus=======正在执行【弹出框点击】
+    #开始执行弹出框点击
+    #强关联弹框
+    Run_keyword_if    '${WindowsRemark}'!='none'    log    尝试强关联弹出框点击1
+    ${RunResult}    Run_keyword_if    '${WindowsRemark}'!='none'    Run_keyword_and_return_status    click element    xpath=.//*[contains(@class,"el-menu--horizontal")][*]//*[text()="${WindowsRemark}"]/parent::*[1]/following-sibling::*//*[text()="${locator}"]
+    Run_keyword_if    '${RunResult}'=='False' and '${WindowsRemark}'!='none'    log    尝试强关联弹出框点击2
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False' and '${WindowsRemark}'!='none'    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),'${WindowsRemark}')]/parent::*/parent::*//*[contains(text(),'${locator}')]
+    #默认弹框正常点击
+    Run_keyword_if    '${RunResult}'!='Ture'    log    正在进行第一次点击1
+    ${RunResult}    Run_keyword_if    '${RunResult}'!='Ture'    Run_keyword_and_return_status    click element    xpath=//*[contains(@class,"el-message-box__btns")]/parent::div/div/button/*[contains(text(),"${locator}")]
+    #js点击
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新弹出框js点击
+    Run_keyword_if    '${RunResult}'=='False'    Assign Id To Element    xpath=.//*[text()='${locator}']    clickme
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    Execute JavaScript    document.getElementById("clickme").click();
+    Run_keyword_if    '${RunResult}'=='False'    Run Keywords    log    在【${locator}】点击失败
+    ...    AND    Should Match Regexp    1    2
+    [Teardown]    log    =======KeyWordExecuteStatus=======已经执行完成【弹出框点击】
+
+选中复选框
+    [Arguments]    ${locator}    ${locatorType}=none    ${index}=1
+    log    正在进行【选中复选框】
+    #进行点击操作
+    log    第一次点击1-checkbox
+    ${RunResult}    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),"${locator}")]//*[contains(@type,"checkbox")][${index}]
+    #以下为重试
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击2-radio
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),"${locator}")]/preceding-sibling::*[contains(@type,"checkbox")][${index}]
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击3-radio-string
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(string(),"${locator}")]//*[contains(@type,"checkbox")][${index}]
+    #选中失败终止
+    Run_keyword_if    '${RunResult}'=='False'    Run Keywords    log    在【${locator}】点击单选框失败
+    ...    AND    Should Match Regexp    1    2
+    [Teardown]    log    =======KeyWordExecuteStatus=======已经执行完成【选中单选框】

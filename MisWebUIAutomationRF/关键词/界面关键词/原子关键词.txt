@@ -45,3 +45,7 @@ Library           Selenium2Library
 日志
     [Arguments]    ${log}
     log    ${log}
+
+清空输入框
+    [Arguments]    ${loactor}
+    Clear Element Text    ${loactor}

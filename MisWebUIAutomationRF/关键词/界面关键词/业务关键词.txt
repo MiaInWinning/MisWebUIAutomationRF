@@ -5,5 +5,7 @@ Resource          复合关键词.txt
 *** Keywords ***
 表格按钮
     [Arguments]    ${ClickElement}
-    点击元素    //div[2]/table/tbody/tr[1]/td/div/button/*[text()='${ClickElement}']
-    //div/table/tbody/tr[1]/td/*[text()='jack测试试卷']
+    点击元素    xpath=//div[2]/table/tbody/tr[1]/td/div/button/*[text()='${ClickElement}']
+    #    //div/table/tbody/tr[1]/td/*[text()='jack测试试卷']
+    #    //div[@class='el-message-box__btns']/button[@class='el-button el-button--default el-button--small']/span
+    #    //div[@class='el-message-box__btns']/button[@class='el-button el-button--default el-button--small el-button--primary']/span
