@@ -49,3 +49,7 @@ Library           Selenium2Library
 清空输入框
     [Arguments]    ${loactor}
     Clear Element Text    ${loactor}
+
+页面不包含文字
+    [Arguments]    ${text}
+    Page should not contain    ${text}
