@@ -1,0 +1,20 @@
+*** Settings ***
+Resource          ../环境配置.txt
+Resource          复合关键词.txt
+
+*** Keywords ***
+表格按钮
+    [Arguments]    ${num}    ${ClickElement}
+    点击元素    xpath=//div[2]/table/tbody/tr[${num}]/td/div/button/*[text()='${ClickElement}']
+    #    //div/table/tbody/tr[1]/td/*[text()='jack测试试卷']
+    #    //div[@class='el-message-box__btns']/button[@class='el-button el-button--default el-button--small']/span
+    #    //div[@class='el-message-box__btns']/button[@class='el-button el-button--default el-button--small el-button--primary']/span
+
+验证表格数据X条
+    [Arguments]    ${text}    ${mun}
+    FOR    ${i}    IN RANGE    1    ${mun}+1
+    \    Wait Until Page Contains Element    //*[contains(text(),"${text}")]/parent::td/parent::tr/parent::tbody/parent::table/parent::div[@class="el-table__fixed-body-wrapper"]/table/tbody/tr[${i}]    1
+
+表格输入
+    [Arguments]    ${Element}    ${text}
+    Input Text    ${Element}    ${text}

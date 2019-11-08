@@ -1,2 +1,14 @@
 *** Keywords ***
 执行sql
+    [Arguments]    ${sql}
+    [Documentation]    \#编写sql请不要使用单引号，开头不要加符号。
+    #编写sql请不要使用单引号，开头不要加符号。
+    ${sqlupper}    Set variable    ${sql}    #将sql全部转换成大写'${sql}'.upper()
+    ${Z}    Evaluate    '${sqlupper}'.strip('')[0:6]    #提取sql前6位，判断是否为select
+    Log    执行${Z}语句
+    Log many    执行sql为：${sqlupper}
+    Connect To Database Using Custom Params    pymysql    ${jdbc}
+    ${res}    Run Keyword If    '${Z}'=='SELECT'    query    ${sqlupper}
+    ...    ELSE    Execute Sql String    ${sqlupper}
+    ${SqlResults}    Run Keyword If    '${Z}'=='SELECT'    Run Keywords    decode    ${res[0][0]}    UTF-8    and    LOG    查询语句转码结果：${SqlResults}
+    disconnect from database

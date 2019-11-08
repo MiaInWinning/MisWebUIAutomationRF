@@ -28,10 +28,6 @@ Library           Selenium2Library
     [Arguments]    ${ClickElement}
     Click Element    ${ClickElement }
 
-点击按钮
-    [Arguments]    ${ClickButton}
-    Click Button    ${ClickButton}
-
 注释
     Comment
 
@@ -49,3 +45,11 @@ Library           Selenium2Library
 日志
     [Arguments]    ${log}
     log    ${log}
+
+清空输入框
+    [Arguments]    ${loactor}
+    Clear Element Text    ${loactor}
+
+页面不包含文字
+    [Arguments]    ${text}
+    Page should not contain    ${text}
