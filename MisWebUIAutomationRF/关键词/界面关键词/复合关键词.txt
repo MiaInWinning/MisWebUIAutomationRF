@@ -169,9 +169,9 @@ Library           AutoItLibrary
     log    第一次点击1-checkbox
     ${RunResult}    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),"${locator}")]//*[contains(@type,"checkbox")][${index}]
     #以下为重试
-    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击2-radio
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击2
     ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),"${locator}")]/preceding-sibling::*[contains(@type,"checkbox")][${index}]
-    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击3-radio-string
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击3
     ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(string(),"${locator}")]//*[contains(@type,"checkbox")][${index}]
     #选中失败终止
     Run_keyword_if    '${RunResult}'=='False'    Run Keywords    log    在【${locator}】点击单选框失败
@@ -245,3 +245,37 @@ Library           AutoItLibrary
     等待    1
     control click    打开    ${EMPTY}    Button1    LEFT
     等待    1
+
+多个日期选择
+    [Arguments]    ${DropBtn_xpath}    ${starttime}    ${endtime}
+    点击元素    //*[contains(@placeholder,"${DropBtn_xpath}")]
+    ${startyear}    Evaluate    '${starttime}'.strip('')[0:10]
+    ${startday}    Evaluate    '${starttime}'.strip('')[11:16]
+    ${endyear}    Evaluate    '${endtime}'.strip('')[0:10]
+    ${endday}    Evaluate    '${endtime}'.strip('')[11:16]
+    等待    1
+    清空输入框    //input[@class='el-input__inner' and @placeholder='开始日期' ]
+    输入文本    //input[@class='el-input__inner' and @placeholder='开始日期' ]    ${startyear}
+    清空输入框    //input[@class='el-input__inner' and @placeholder='开始时间' ]
+    输入文本    //input[@class='el-input__inner' and @placeholder='开始时间' ]    ${startday}
+    清空输入框    //input[@class='el-input__inner' and @placeholder='结束日期' ]
+    输入文本    //input[@class='el-input__inner' and @placeholder='结束日期' ]    ${endyear}
+    清空输入框    //input[@class='el-input__inner' and @placeholder='结束时间' ]
+    输入文本    //input[@class='el-input__inner' and @placeholder='结束时间' ]    ${endday}
+    等待    1
+    点击元素    //div[contains(@x-placement,'bottom-start')]/div[2]//*[contains(text(),"确定")]
+
+选中单选框
+    [Arguments]    ${locator}    ${locatorType}=none    ${index}=1
+    #radio-1
+    log    第一次点击1-radio
+    ${RunResult}    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),"${locator}")]//*[contains(@type,"radio")][${index}]
+    #以下为重试
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击2-radio
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),"${locator}")]/preceding-sibling::*[contains(@type,"radio")][${index}]
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击3-radio-string
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(string(),"${locator}")]//*[contains(@type,"radio")][${index}]
+    #选中失败终止
+    Run_keyword_if    '${RunResult}'=='False'    Run Keywords    log    在【${locator}】点击单选框失败
+    ...    AND    Should Match Regexp    1    2
+    [Teardown]    log    =======KeyWordExecuteStatus=======已经执行完成【选中单选框】
