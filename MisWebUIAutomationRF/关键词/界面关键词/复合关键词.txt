@@ -1,6 +1,8 @@
 *** Settings ***
 Resource          原子关键词.txt
 Resource          ../环境配置.txt
+Library           OperatingSystem
+Library           AutoItLibrary
 
 *** Keywords ***
 进入模块
@@ -167,9 +169,9 @@ Resource          ../环境配置.txt
     log    第一次点击1-checkbox
     ${RunResult}    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),"${locator}")]//*[contains(@type,"checkbox")][${index}]
     #以下为重试
-    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击2-radio
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击2
     ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),"${locator}")]/preceding-sibling::*[contains(@type,"checkbox")][${index}]
-    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击3-radio-string
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击3
     ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(string(),"${locator}")]//*[contains(@type,"checkbox")][${index}]
     #选中失败终止
     Run_keyword_if    '${RunResult}'=='False'    Run Keywords    log    在【${locator}】点击单选框失败
@@ -183,8 +185,6 @@ Resource          ../环境配置.txt
     ...    1、${input_date}：输入的日期参数，格式为2016-2-3 ，个位数不补0，不能写为2016-02-03
     ...
     ...    2、${dropBtn_xpath}:日期控件的下拉按钮xpath路径
-    ...
-    ...
     #    Click Element    ${startDayPath}
     点击元素    xpath=//label[contains(text(),"${DropBtn_xpath}")]/following-sibling::div/div
     ${year}    Evaluate    '${input_date}'.strip('')[0:10]
@@ -205,3 +205,77 @@ Resource          ../环境配置.txt
 等待元素出现2
     [Arguments]    ${wupce}    ${s}
     等待元素出现    //*[contains(@placeholder,"${wupce}")]    ${s}
+
+文件下载
+    [Arguments]    ${locator}=none    ${FilePath}=none
+    [Documentation]    EXCEL导入:
+    ...
+    ...    1、$locator：导入/导出 ,界面导入功能显示的文字
+    ...
+    ...    2、${vlaue}: 需要导入文件的路径,如果不提供导入文件路径,或者文件路径错误,则会默认C盘生成一个文件c:\\DefaultTestFile.xlsx 进行导入操作,防止自动化用例卡死
+    log    【正在进行】选择文件操作
+    等待    2
+    ${RunResult}    ${RunResultLog}    Run Keyword And Ignore Error    Page should contain    ${locator}
+    #选择文件    .//*[contains(@id='Import')][contains(@id='OK')]    xpath=.//*[contains(@id,'File')][contains(@type,'file')]
+    Run_keyword_if    '${locator}'!='none' and '${locator}'!=''    点击按钮    ${locator}
+    sleep    5
+    #    switch browser    Windows_ly1
+    #点击选择文件
+    log    验证按钮是否存在${RunResult}
+    ${rrr}    Run_keyword_and_return_status    File Should Exist    ${FilePath}
+    log    ${rrr}
+    Run_keyword_if    '${rrr} '=='False'    log    【警告】导出文件不存在!!
+    #调用三方下载
+    #    ${RunResult}    Run_keyword_if    '${RunResult}'!='False'    Run_keyword_and_return_status    evaluate    os.system('AutoTestShell.ly')    os
+    sleep    10
+    #清理生成文件路径
+    log    ${rrr}
+    Run_keyword_if    '${rrr}'=='True'    Remove File    ${FilePath}
+    #判断文件是否下载成功
+    #    ${IsSave}    evaluate    os.system('if exist C:\SaveSuccess.lyy (exit 0) else (exit 1)')    os
+    #    log    ${IsSave}
+    #    Run_keyword_if    '${IsSave}'=='0'    log    文件下载成功,文件路径在${FilePath}
+    #    Run_keyword_if    '${IsSave}'=='1'    Run Keywords    log    文件下载失败!!路径不存在${FilePath} AND    Should Match Regexp    【警告】文件下载失败了1    文件下载失败了2
+
+文件上传
+    [Arguments]    ${FilePath}
+    #点击选择文件
+    等待    2
+    control Send    打开    ${EMPTY}    [CLASS:Edit; INSTANCE:1]    ${FilePath}    #输入框
+    等待    1
+    control click    打开    ${EMPTY}    Button1    LEFT
+    等待    1
+
+多个日期选择
+    [Arguments]    ${DropBtn_xpath}    ${starttime}    ${endtime}
+    点击元素    //*[contains(@placeholder,"${DropBtn_xpath}")]
+    ${startyear}    Evaluate    '${starttime}'.strip('')[0:10]
+    ${startday}    Evaluate    '${starttime}'.strip('')[11:16]
+    ${endyear}    Evaluate    '${endtime}'.strip('')[0:10]
+    ${endday}    Evaluate    '${endtime}'.strip('')[11:16]
+    等待    1
+    清空输入框    //input[@class='el-input__inner' and @placeholder='开始日期' ]
+    输入文本    //input[@class='el-input__inner' and @placeholder='开始日期' ]    ${startyear}
+    清空输入框    //input[@class='el-input__inner' and @placeholder='开始时间' ]
+    输入文本    //input[@class='el-input__inner' and @placeholder='开始时间' ]    ${startday}
+    清空输入框    //input[@class='el-input__inner' and @placeholder='结束日期' ]
+    输入文本    //input[@class='el-input__inner' and @placeholder='结束日期' ]    ${endyear}
+    清空输入框    //input[@class='el-input__inner' and @placeholder='结束时间' ]
+    输入文本    //input[@class='el-input__inner' and @placeholder='结束时间' ]    ${endday}
+    等待    1
+    点击元素    //div[contains(@x-placement,'bottom-start')]/div[2]//*[contains(text(),"确定")]
+
+选中单选框
+    [Arguments]    ${locator}    ${locatorType}=none    ${index}=1
+    #radio-1
+    log    第一次点击1-radio
+    ${RunResult}    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),"${locator}")]//*[contains(@type,"radio")][${index}]
+    #以下为重试
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击2-radio
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(text(),"${locator}")]/preceding-sibling::*[contains(@type,"radio")][${index}]
+    Run_keyword_if    '${RunResult}'=='False'    log    尝试重新点击3-radio-string
+    ${RunResult}    Run_keyword_if    '${RunResult}'=='False'    Run_keyword_and_return_status    click element    xpath=.//*[contains(string(),"${locator}")]//*[contains(@type,"radio")][${index}]
+    #选中失败终止
+    Run_keyword_if    '${RunResult}'=='False'    Run Keywords    log    在【${locator}】点击单选框失败
+    ...    AND    Should Match Regexp    1    2
+    [Teardown]    log    =======KeyWordExecuteStatus=======已经执行完成【选中单选框】
