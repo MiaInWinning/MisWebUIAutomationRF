@@ -44,7 +44,7 @@ Resource          ../../关键词/界面关键词/原子关键词.txt
     点击按钮    单选题
     点击按钮    设置
     等待    2
-    表格输入    //table/tbody/tr/td[3]/div/div/input    100
+    表格输入#废弃    //table/tbody/tr/td[3]/div/div/input    100
     点击按钮    生成试卷
     页面检查    1106测试试卷
     关闭浏览器

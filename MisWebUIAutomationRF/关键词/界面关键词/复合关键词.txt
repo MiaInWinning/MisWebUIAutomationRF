@@ -20,6 +20,7 @@ Library           AutoItLibrary
     Run_keyword_if    '${threemodule}'=='none'    点击元素    xpath=//*[contains(text(),"${twomodule}")]
     ...    ELSE IF    '${threemodule}'!='none'    Run Keywords    等待    1
     ...    AND    点击元素    xpath=//*[contains(text(),"${threemodule}")]    #三级模块
+    等待    2
     [Teardown]    log    已经执行完成【进入模块】
 
 登陆
@@ -59,11 +60,13 @@ Library           AutoItLibrary
     ...
     ...    关键词说明：简易下拉选择，由于本web下拉为input，故简易为先选择第一个input、在选择展开后input的值。
     log    正在进行【输入文本框操作】
-    等待元素出现    xpath=//input[@placeholder="${name}"]    10
-    点击元素    xpath=//input[@placeholder="${name}"]
-    等待    1
-    等待元素出现    xpath=//*[contains(text(),"${value}")]    10
-    点击元素    xpath=//*[contains(text(),"${value}")]
+    sleep    1
+    ${RunResult}    Run_keyword_and_return_status    Click Element    xpath=//input[@placeholder="${name}"]
+    ${RunResult}    Run_keyword_if    '${RunResult}'!='True'    Run_keyword_and_return_status    Click Element    xpath=//span[contains(text(),"${name}")]
+    log    已经点击下拉key
+    sleep    1    10
+    ${RunResult}    Run_keyword_and_return_status    Click Element    xpath=//*[contains(text(),"${value}")]
+    ${RunResult}    Run_keyword_if    '${RunResult}'!='True'    Run_keyword_and_return_status    Click Element    xpath=//td[contains(text(),"${value}")]
     [Teardown]    log    已经执行完成【输入文本框】
 
 输入文本框
@@ -279,3 +282,110 @@ Library           AutoItLibrary
     Run_keyword_if    '${RunResult}'=='False'    Run Keywords    log    在【${locator}】点击单选框失败
     ...    AND    Should Match Regexp    1    2
     [Teardown]    log    =======KeyWordExecuteStatus=======已经执行完成【选中单选框】
+
+多个日期选择无文本框
+    [Arguments]    ${starttime}    ${endtime}
+    [Documentation]    还有bug：
+    ...
+    ...    1、日，出现重复，上月的前一个星期，和本月的部分重复，比如1月1号，和12月1号。日一栏会匹配两个1。12月1号，和12月11号。日一栏会匹配3个1.
+    等待    3
+    ${startyear}    Evaluate    '${starttime}'.strip('')[0:4]    #开始时间：年
+    ${startmonth}    Evaluate    '${starttime}'.strip('')[5:7]    #开始时间：月
+    ${startday}    Evaluate    '${starttime}'.strip('')[8:10]    #开始时间：日
+    ${starttime}    Evaluate    '${starttime}'.strip('')[11:16]    #开始时间：时
+    #    log    ${startyear}    ${startmonth}    ${startday}    ${starttime}
+    ${sysstartyearmonth}    Get Element Attribute    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-left"]/div/div    textContent    #获取系统当前显示的年月
+    ${sysstartyear}    Evaluate    '${sysstartyearmonth}'.strip('')[0:4]    #获取系统当前显示的年
+    ${sysstartmonth}    Evaluate    '${sysstartyearmonth}'.strip('')[7:9]    #获取系统当前显示的月
+    ${sysstartmonth}    Run_keyword_if    '${sysstartyearmonth}'.strip('')[8:9] ==' '    set variable    0${sysstartmonth}    #1-9月自动补0
+        ...    ELSE IF     '${sysstartyearmonth}'.strip('')[8:9] !=' '    Evaluate    '${sysstartyearmonth}'.strip('')[7:9]    #10-12月不需要补零
+    log    ${sysstartmonth}
+    ${Differstartyear}    Evaluate    ${${sysstartyear}}-${${startyear}}    #获取的时间减去输入的时间
+    ${Differstartmonth}    Evaluate    ${${sysstartmonth}}-${${startmonth}}    #获取的时间减去输入的时间    加一层${}为强制将字符串转为数值类型，因为有01,02等数字，会被当成字符串，导致无法计算。
+    ${Differstartday}    set variable    ${startday}    #获取开始时间：日
+    log    ${Differstartyear}
+    #开始时间计算年
+    ${startlastyear}    Evaluate    0    #默认：往前差0年
+    ${startnextyear}    Evaluate    0    #默认：往后差0年
+    ${startlastyear}    Run_keyword_if    ${Differstartyear}>0    set variable    ${Differstartyear}    #获取往前年份差额
+    ...    ELSE    Evaluate    0
+    ${startnextyear}    Run_keyword_if    ${Differstartyear}<0    Evaluate    abs(${Differstartyear})    #获取往后年份差额
+    ...    ELSE    Evaluate    0
+    log    ${startlastyear}
+    log    ${startnextyear}
+    FOR    ${i}    IN RANGE    0    ${startlastyear}    #往前差多少年，循环多少次    #将log替换成点击事件（IF有点多余。。）
+    \    Run_keyword_if    ${Differstartyear}>0 and ${startlastyear}>0    Run Keywords    sleep    1
+    ...    AND    Click Element    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-left"]/div/button[1]
+    ...    AND    log    点击：//*[@class="el-picker-panel__content el-date-range-picker__content is-left"]/div/button[1]
+    FOR    ${i}    IN RANGE    0    ${startnextyear}    #往后差多少年，循环多少次
+    \    Run_keyword_if    ${Differstartyear}<0 and ${startnextyear} >0    Run Keywords    sleep    1
+    ...    AND    Click Element    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-left"]/div/button[3]
+    ...    AND    log    点击：xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-left"]/div/button[2]
+    #开始时间计算月
+    ${startlastmonth}    Evaluate    0    #默认差0月
+    ${startnextmonth}    Evaluate    0    #默认差0月
+    ${startlastmonth}    Run_keyword_if    ${Differstartmonth}>0    set variable    ${Differstartmonth}    #获取往前月份差额
+    ...    ELSE    Evaluate    0
+    ${startnextmonth}    Run_keyword_if    ${Differstartmonth}<0    Evaluate    abs(${Differstartmonth})    #获取往后月份差额
+    ...    ELSE    Evaluate    0
+    log    ${startlastmonth}
+    log    ${startnextmonth}
+    FOR    ${i}    IN RANGE    0    ${startlastmonth}    #往前差多少年，循环多少次
+    \    Run_keyword_if    ${Differstartmonth}>0 and ${startlastmonth}>0    Run Keywords    sleep    1
+    ...    AND    Click Element    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-left"]/div/button[2]
+    ...    AND    log    点击：//*[@class="el-picker-panel__content el-date-range-picker__content is-left"]/div/button[4]
+    FOR    ${i}    IN RANGE    0    ${startnextmonth}    #往后差多少年，循环多少次
+    \    Run_keyword_if    ${Differstartmonth}<0 and ${startnextmonth}>0    Run Keywords    sleep    1
+    ...    AND    Click Element    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-left"]/div/button[4]
+    ...    AND    log    点击：//*[@class="el-picker-panel__content el-date-range-picker__content is-left"]/div/button[3]
+    Click Element    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-left"]/table//*[contains(text(),"24")]
+    #    还有bug，系统的月份没有补零
+    #    ------------------------------    我是分割线，上面是第一个控件    ------------------------------
+    #    开始操作第二个时间控件
+    ${endyear}    Evaluate    '${endtime}'.strip('')[0:4]    #结束时间：年
+    ${endmonth}    Evaluate    '${endtime}'.strip('')[5:7]    #结束时间：月
+    ${endday}    Evaluate    '${endtime}'.strip('')[8:10]    #结束时间：日
+    ${endtime}    Evaluate    '${endtime}'.strip('')[11:16]    #结束时间：时
+    ${sysendyearmonth}    Get Element Attribute    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-right"]/div/div    textContent    #获取系统当前显示的年月
+    ${sysendyear}    Evaluate    '${sysendyearmonth}'.strip('')[0:4]    #获取系统当前显示的年
+    ${sysendmonth}    Evaluate    '${sysendyearmonth}'.strip('')[7:9]    #获取系统当前显示的月
+    ${sysendmonth}    Run_keyword_if    '${sysendyearmonth}'.strip('')[8:9] ==' '    set variable    0${sysendmonth}    #1-9月自动补0
+        ...    ELSE IF     '${sysendyearmonth}'.strip('')[8:9] !=' '    Evaluate    '${sysendyearmonth}'.strip('')[7:9]    #10-12月不需要补零
+    ${Differendyear}    Evaluate    ${${sysendyear}}-${${endyear}}    #获取的时间减去输入的时间
+    ${Differendmonth}    Evaluate    ${${sysendmonth}}-${${endmonth}}    #获取的时间减去输入的时间    加一层${}为强制将字符串转为数值类型，因为有01,02等数字，会被当成字符串，导致无法计算。
+    ${Differendday}    set variable    ${endday}    #获取开始时间：日
+    #开始时间计算年
+    ${endlastyear}    Evaluate    0    #默认：往前差0年
+    ${endnextyear}    Evaluate    0    #默认：往后差0年
+    ${endlastyear}    Run_keyword_if    ${Differendyear}>0    set variable    ${Differendyear}    #获取往前年份差额
+    ...    ELSE    Evaluate    0
+    ${endnextyear}    Run_keyword_if    ${Differendyear}<0    Evaluate    abs(${Differendyear})    #获取往后年份差额
+    ...    ELSE    Evaluate    0
+    log    ${endlastyear}
+    log    ${endnextyear}
+    FOR    ${i}    IN RANGE    0    ${endlastyear}    #往前差多少年，循环多少次
+    \    Run_keyword_if    ${Differendyear}>0 and ${endlastyear}>0    Run Keywords    sleep    1
+    ...    AND    Click Element    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-right"]/div/button[1]
+    ...    AND    log    点击：xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-right"]/div/button[1]
+    FOR    ${i}    IN RANGE    0    ${endnextyear}    #往后差多少年，循环多少次
+    \    Run_keyword_if    ${Differendyear}<0 and ${endnextyear}    Run Keywords    sleep    1
+    ...    AND    Click Element    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-right"]/div/button[3]
+    ...    AND    log    点击：xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-right"]/div/button[2]
+    #开始时间计算月
+    ${endlastmonth}    Evaluate    0    #默认差0月
+    ${endnextmonth}    Evaluate    0    #默认差0月
+    ${endlastmonth}    Run_keyword_if    ${Differendmonth}>0    set variable    ${Differendmonth}    #获取往前月份差额
+    ...    ELSE    Evaluate    0
+    ${endnextmonth}    Run_keyword_if    ${Differendmonth}<0    Evaluate    abs(${Differendmonth})    #获取往后月份差额
+    ...    ELSE    Evaluate    0
+    log    ${endlastmonth}
+    log    ${endnextmonth}
+    FOR    ${i}    IN RANGE    0    ${endlastmonth}    #往前差多少年，循环多少次
+    \    Run_keyword_if    ${Differendmonth}>0 and ${endlastmonth}>0    Run Keywords    sleep    1
+    ...    AND    Click Element    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-right"]/div/button[2]
+    ...    AND    log    点击：xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-right"]/div/button[4]
+    FOR    ${i}    IN RANGE    0    ${endnextmonth}    #往后差多少年，循环多少次
+    \    Run_keyword_if    ${Differendmonth}<0 and ${endnextmonth}>0    Run Keywords    sleep    1
+    ...    AND    Click Element    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-right"]/div/button[4]
+    ...    AND    log    点击：xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-right"]/div/button[3]
+    Click Element    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-right"]/table//*[contains(text(),"24")]

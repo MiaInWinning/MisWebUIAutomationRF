@@ -13,8 +13,8 @@ Resource          复合关键词.txt
 验证表格数据X条
     [Arguments]    ${text}    ${mun}
     FOR    ${i}    IN RANGE    1    ${mun}+1
-    \    Wait Until Page Contains Element    //*[contains(text(),"${text}")]/parent::td/parent::tr/parent::tbody/parent::table/parent::div[@class="el-table__fixed-body-wrapper"]/table/tbody/tr[${i}]    1
+        Wait Until Page Contains Element    //*[contains(text(),"${text}")]/parent::td/parent::tr/parent::tbody/parent::table/parent::div[@class="el-table__fixed-body-wrapper"]/table/tbody/tr[${i}]    1
 
-表格输入
+表格输入#废弃
     [Arguments]    ${Element}    ${text}
     Input Text    ${Element}    ${text}
