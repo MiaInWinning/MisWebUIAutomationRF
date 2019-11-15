@@ -389,3 +389,35 @@ Library           AutoItLibrary
     ...    AND    Click Element    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-right"]/div/button[4]
     ...    AND    log    点击：xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-right"]/div/button[3]
     Click Element    xpath=//*[@class="el-picker-panel__content el-date-range-picker__content is-right"]/table//*[contains(text(),"24")]
+
+切换frame
+    [Arguments]    ${Frame}    ${value}
+    ${RunResult}    Run_keyword_and_return_status    select frame    xpath=//*[contains(@${Frame},'${value}')]
+    #    ${RunResult}    Run_keyword_if    '${RunResult}'!='True'    Run_keyword_and_return_status    select frame    xpath=//*[contains(@${Frame},'${value}')]
+
+表格输入
+    [Arguments]    ${table}    ${row}    ${column}    ${text}
+    ${RunResult}    Run_keyword_and_return_status    Wait Until Page Contains Element    xpath=//table[@class='${table}']    3
+    ${RunResult}    Run_keyword_if    '${RunResult}'!='True'    Wait Until Page Contains Element    xpath=//table[@style='${table}']    3
+    #正式输入
+    Run_keyword_if    '${RunResult}'!='True'    Run Keywords    Click Element    //table[@class='${table}']//tr[${row}]/td[${column}]
+    ...    AND    Input Text    ${text}
+    #放弃执行关键词
+    Run_keyword_if    '${RunResult}'!='True'    log    关键词执行失败
+
+退出frame
+    Unselect Frame
+
+表格时间控件
+    [Arguments]    ${time}
+    ${year}    Evaluate    '${time}'.strip('')[0:4]    #开始时间：年
+    ${month}    Evaluate    '${time}'.strip('')[5:7]    #开始时间：月
+    ${day}    Evaluate    '${time}'.strip('')[8:10]    #开始时间：日
+    ${systime}    Get Element Attribute    xpath=//table[@class='dt']/thead/tr/td[@class='title']    textContent    #获取系统当前显示的年月
+    ${RunResult}    Run_keyword_if    Click Element    xpath=//table[@class='dt']/thead/tr/td[@class='title']
+    Run_keyword_if    '${RunResult}'=='True'    Run Keywords    Click Element    xpath=//table[@class='mt']/tbody/tr/td[@class='month']
+    ...    AND    Click Element    xpath=//table[@class='mt']/tbody/tr/td[@class='year']
+    Click Element    //table[@class='mt']/tfoot/tr/td[contains(text(),"确定")]
+    #    Click Element    //table[@class='dt']/tbody/tr/td[@class='day' and contains(text(),"${day}")]
+    #    精准匹配    xpath=//android.widget.TextView[@text='点击分享密码']
+    Click Element    //table[@class='dt']/tbody/tr/td[@class='day' and @text="${day}")]
